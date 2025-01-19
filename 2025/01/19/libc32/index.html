@@ -424,15 +424,15 @@ IDA分析
         <div class="card-content article-card-content">
             <div id="articleContent">
                 <p><strong>checksec</strong></p>
-<p><img src="C:/Users/33942/Pictures/Screenshots/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-19%20124851.png" alt="屏幕截图 2025-01-19 124851"></p>
+<p><img src="/imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-19%20124851.png" alt="屏幕截图 2025-01-19 124851"></p>
 <p>可以发现32位，NX保护开启</p>
 <p><strong>IDA分析</strong></p>
-<p><img src="C:/Users/33942/Pictures/Screenshots/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-19%20124932.png" alt="屏幕截图 2025-01-19 124932"></p>
+<p><img src="/imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-19%20124932.png" alt="屏幕截图 2025-01-19 124932"></p>
 <p>主函数main中并没有什么问题，进入vuln函数</p>
-<p><img src="C:/Users/33942/Pictures/Screenshots/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-19%20124948.png" alt="屏幕截图 2025-01-19 124948"></p>
-<p>可以发现buf存在栈溢出，shift F12<img src="C:/Users/33942/Pictures/Screenshots/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-19%20144947.png" alt="屏幕截图 2025-01-19 144947"></p>
+<p><img src="/imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-19%20124948.png" alt="屏幕截图 2025-01-19 124948"></p>
+<p>可以发现buf存在栈溢出，shift F12<img src="/imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-19%20144947.png" alt="屏幕截图 2025-01-19 144947"></p>
 <p>不存在system和/bin/sh字符串</p>
-<p><img src="C:/Users/33942/Pictures/Screenshots/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-19%20145051.png" alt="屏幕截图 2025-01-19 145051"></p>
+<p><img src="/imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-01-19%20145051.png" alt="屏幕截图 2025-01-19 145051"></p>
 <p>有write函数考虑libc，知道write函数的got表地址，我们就可以利用libc推算出偏移和基址，进而推算system和/bin/sh的got表地址，需要构造两个payload,第一个payload用于获得write函数的got表地址，先用字符填满缓冲区和ebp地址，再使用plt调用write函数用于覆盖返回地址，返回main，返回write的got表地址，再读入4个字节，payload1=b’a’*(0x88+0x4)+p32(write_plt)+p32(main)+p32(1)+p32(write_got)+p32(4)。</p>
 <p>得到write的got表地址就可以计算libc的基地址，进而根据偏移可以推算出字符串system和/bin/sh的真实地址，构造第二个payload,payload=b’a’*(0x88+0x4)+p32(system)+p32(main)+p32(binsh),先覆盖返回地址，在覆盖system的返回地址，传入system的参数/bin/sh。</p>
 <p>这道题给了libc文件，没有给的要去寻找并下载libc文件。</p>
