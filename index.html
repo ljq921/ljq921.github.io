@@ -591,6 +591,100 @@
              <!-- 隐藏某个文章 -->
             <div class="article col s12 m6 l4" data-aos="zoom-in">
                 <div class="card">
+                    <a href="/2025/01/19/ret2textandshellcode/">
+                        <div class="card-image">
+                            
+                            
+                            <img src="/medias/featureimages/12.jpg" class="responsive-img" alt="ret2textandshellcode">
+                            
+                            <span class="card-title">ret2textandshellcode</span>
+                        </div>
+                    </a>
+
+                    <div class="card-content article-content">
+                        <div class="summary block-with-text">
+                            
+                                ret2text
+checksec
+
+NX保护开启
+IDA分析
+
+无异常，进入vuln函数
+
+buf存在栈溢出，无其他问题，F12查看
+
+发现有system和/bin/sh字符串就好办了，32位程序在运行中栈的结构是：调用函数地址 -&gt
+                            
+                        </div>
+                        <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2025-01-19
+                            </span>
+                            <span class="publish-author">
+                                
+                                <i class="fas fa-user fa-fw"></i>
+                                ......
+                                
+                            </span>
+                        </div>
+                    </div>
+
+                    
+                </div>
+            </div>
+              <!-- 隐藏某个文章 -->
+            
+             <!-- 隐藏某个文章 -->
+            <div class="article col s12 m6 l4" data-aos="zoom-in">
+                <div class="card">
+                    <a href="/2025/01/19/libc32/">
+                        <div class="card-image">
+                            
+                            
+                            <img src="/medias/featureimages/3.jpg" class="responsive-img" alt="libc32">
+                            
+                            <span class="card-title">libc32</span>
+                        </div>
+                    </a>
+
+                    <div class="card-content article-content">
+                        <div class="summary block-with-text">
+                            
+                                checksec
+
+可以发现32位，NX保护开启
+IDA分析
+
+主函数main中并没有什么问题，进入vuln函数
+
+可以发现buf存在栈溢出，shift F12
+不存在system和/bin/sh字符串
+
+有write函数考虑libc，知道
+                            
+                        </div>
+                        <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2025-01-19
+                            </span>
+                            <span class="publish-author">
+                                
+                                <i class="fas fa-user fa-fw"></i>
+                                ......
+                                
+                            </span>
+                        </div>
+                    </div>
+
+                    
+                </div>
+            </div>
+              <!-- 隐藏某个文章 -->
+            
+             <!-- 隐藏某个文章 -->
+            <div class="article col s12 m6 l4" data-aos="zoom-in">
+                <div class="card">
                     <a href="/2025/01/18/libc64/">
                         <div class="card-image">
                             
@@ -604,10 +698,11 @@
                     <div class="card-content article-content">
                         <div class="summary block-with-text">
                             
-                                攻防世界welpwnchecksec
+                                checksec
 ![屏幕截图 2025-01-16 114726](C:\Users\33942\Pictures\Screenshots\屏幕截图 2025-01-16 114726.png)
 NX保护开启
-IDA6
+IDA64分析
+![屏幕截图
                             
                         </div>
                         <div class="publish-info">

